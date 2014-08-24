@@ -10,7 +10,6 @@ library(stringr)
 
 features <- read.table("./features.txt")
 activities <- read.table("./activity_labels.txt")
-colnames(activities)[1]<-"Activity"
 
 ## Test Data Sets
 
@@ -35,10 +34,16 @@ mergeS <- rbind(testS, trainS)
 ## Rename Columns in Merged Tables
 
 colnames(mergeX)<-features[,2]
-colnames(mergeY)<-"Activity"
 colnames(mergeS)<-"Subject"
 
 ## Rename rows in activities tables to merge
+
+order<-1:10299
+mergeY["order"]<-order
+mergedY <- merge(mergeY,activities)
+sortedY <- mergedY[order(mergedY[,"order"]),]
+cleanY <- data.frame(Activity=character(),stringsAsFactors=FALSE)
+cleanY <- sortedY[,3]
 
 ## Locate mean and std columns within features
 
@@ -57,5 +62,9 @@ cleanX <- mergeX[meanstd]
 
 ## Merge into one combo set (cbind)
 
-combo <- cbind(mergeS,mergeY,cleanX)
-cleancombo <- merge(combo,activities)
+combo <- cbind(mergeS,cleanY,cleanX)
+colnames(combo)[2]<-"Activity"
+
+## Writes the table as .txt file
+
+write.table(combo, file = "test.txt",row.name=FALSE)
